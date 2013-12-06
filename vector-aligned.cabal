@@ -15,9 +15,9 @@ cabal-version:       >=1.10
 library
   exposed-modules:     Data.Vector.Storable.Aligned
   other-extensions:    ScopedTypeVariables
-  build-depends:       base >=4.6 && < 4.7, 
-                       primitive >=0.5 && < 0.6,
-                       vector >=0.10 && < 0.11
+  build-depends:       base >= 4.5 && < 4.7, 
+                       primitive >= 0.5 && < 0.6,
+                       vector >= 0.10 && < 0.11
   hs-source-dirs:      src
   default-language:    Haskell2010
 
@@ -26,7 +26,7 @@ test-suite tests
   hs-source-dirs: tests
   main-is: Tests.hs
   default-language: Haskell2010
-  build-depends: base >= 4.6 && < 5,
+  build-depends: base >= 4.5 && < 5,
                  vector >= 0.10,
                  vector-aligned,
                  tasty, tasty-hunit, HUnit
