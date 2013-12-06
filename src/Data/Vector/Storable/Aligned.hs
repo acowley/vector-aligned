@@ -2,9 +2,10 @@
 -- | Create mutable 'VM.Vector's whose data begin at a specified
 -- alignment.
 module Data.Vector.Storable.Aligned (Alignment, align, alignPow2, alignKB,
-                                     getAlignment, new) where
+                                     alignVector, getAlignment, new) where
 import Control.Monad (liftM)
 import Control.Monad.Primitive
+import qualified Data.Vector.Storable as V
 import qualified Data.Vector.Storable.Mutable as VM
 import Data.Word (Word8)
 import Foreign.ForeignPtr.Unsafe
@@ -41,9 +42,9 @@ alignPow2 = Alignment . (2^)
 alignKB :: Int -> Alignment
 alignKB = Alignment . (* 1024)
 
-alignedVector :: PrimMonad m
-              => Alignment -> Int -> m (VM.MVector (PrimState m) Word8)
-alignedVector (Alignment a) numBytes =
+alignedBytes :: PrimMonad m
+             => Alignment -> Int -> m (VM.MVector (PrimState m) Word8)
+alignedBytes (Alignment a) numBytes =
   do v <- VM.new (numBytes + a)
      let ptr = unsafeForeignPtrToPtr . fst $ VM.unsafeToForeignPtr0 v
          ptr' = alignPtr ptr a
@@ -54,4 +55,12 @@ alignedVector (Alignment a) numBytes =
 -- given alignment.
 new :: forall a m. (Storable a, PrimMonad m)
     => Alignment -> Int -> m (VM.MVector (PrimState m) a)
-new a n = liftM VM.unsafeCast $ alignedVector a (n * sizeOf (undefined::a))
+new a n = liftM VM.unsafeCast $ alignedBytes a (n * sizeOf (undefined::a))
+
+-- | Copy a vector into a newly-allocated region of memory that begins
+-- at the desired boundary.
+alignVector :: Storable a => Alignment -> V.Vector a -> V.Vector a
+alignVector a src = V.create $ 
+                    do dst <- new a (V.length src)
+                       V.copy dst src
+                       return dst
